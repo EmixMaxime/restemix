@@ -35,6 +35,4 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
   }
 };
 
-module.exports = {
-  Controller, updateDatabase, getResourceName
-};
+module.exports = Controller;
