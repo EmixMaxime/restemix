@@ -1,0 +1,26 @@
+{
+  "name": "restemix",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EmixMaxime/restemix.git"
+  },
+  "author": "Emix <emixmaxime@outlook.fr> (https://maxime-moreau.fr)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EmixMaxime/restemix/issues"
+  },
+  "homepage": "https://github.com/EmixMaxime/restemix#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
+  }
+}
