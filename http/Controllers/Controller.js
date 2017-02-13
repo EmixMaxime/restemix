@@ -5,7 +5,7 @@
 // }
 
 // getModel et getSchemaObject sont injectés dans RestController de l'application ;-)
-const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateDatabase, FillSchema }, getModel, getSchemaObject) => {
+const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateDatabase, fillSchema }, getModel, getSchemaObject) => {
 
   return {
     index (req, callback) {

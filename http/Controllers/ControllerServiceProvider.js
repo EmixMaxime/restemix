@@ -6,7 +6,7 @@ const getResourceName = require('./utils/getResourceName');
 const updateDatabase = require('./utils/updateDatabase');
 
 const controllerServiceProvider = (dependencies) => Controller.bind(null, dependencies);
-const controller = controllerServiceProvider({getRestFilters, getRestCursor, getResourceName, updateDatabase, FillSchema});
+const controller = controllerServiceProvider({getRestFilters, getRestCursor, getResourceName, updateDatabase, fillSchema});
 
 module.exports = {
   controllerServiceProvider,
