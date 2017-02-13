@@ -57,6 +57,10 @@ escape-string-regexp@1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
 
+fill-schema:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/fill-schema/-/fill-schema-0.0.1.tgz#2114c1a1ce7d667f7489665cf2ad684d11989964"
+
 fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
