@@ -15,8 +15,7 @@ const RestCursor = function () {
 
 const restCursor = RestCursor();
 
-const GetRestCursor = function ({ RestCursor }) {
-  const restCursor = RestCursor();
+const GetRestCursor = function ({ restCursor }) {
   return (req) => {
     return (action) => {
       switch (action) {
