@@ -76,15 +76,16 @@ describe('Controller', () => {
       exec: (cb) => {},
     };
 
-    const limitSpy = sinon.spy(fakeModel, 'limit');
-    const sortSpy = sinon.spy(fakeModel, 'sort');
-    const execSpy = sinon.spy(fakeModel, 'exec');
-
     const getModel = () => {
       return fakeModel
     };
 
+    const limitSpy = sinon.spy(fakeModel, 'limit');
+    const sortSpy = sinon.spy(fakeModel, 'sort');
+    const execSpy = sinon.spy(fakeModel, 'exec');
+
     const executeTest = function (method) {
+
       const Controller = controllerServiceProvider({
         getRestFilters, getRestCursor, getResourceName, updateDatabase, fillSchema,
         Cancan
@@ -111,5 +112,75 @@ describe('Controller', () => {
       executeTest('show');
     });
 
-  })
+  });
+
+  describe('#update', () => {
+
+
+    it('It should call findOne with the correct mongo query', () => {
+    
+      const requestParamSlug = 'json-web-token';
+      const resourceName = 'tutorials';
+
+      const fakeRequest = {
+        body: {
+          title: 'What is json web token?',
+          online: true
+        },
+        params: {}
+      };
+      fakeRequest.params[resourceName] = requestParamSlug;
+      
+      // Into my database (simulation)
+      const fakeData = {
+        title: 'Discovering the json web token !',
+        slug: 'json-web-token',
+        description: "It's very powerfull",
+        author: 'emix',
+        online: false
+      };
+
+      const fillSchema = function (schemObject) {
+        return (body) => fakeRequest.body
+      };
+
+      const Cancan = function (policy) {
+        return (user) => (action) => (data) => {};
+      };
+
+      const fakeModel = {
+        findOne: (query, callback) => callback(null, fakeData),
+        save: (callback) => {}
+      };
+
+      const getModel = () => fakeModel;
+      const getSchemaObject = () => {};
+      const getPolicy = () => {};
+      const getResourceName = (req) => resourceName;
+      
+      const getResourceNameSpy = sinon.spy(getResourceName);
+
+
+      const findOneSpy= sinon.spy(fakeModel, 'findOne');
+      const saveSpy = sinon.spy(fakeModel, 'save');
+
+      const Controller = controllerServiceProvider({
+        getResourceName, fillSchema,
+        Cancan
+      });
+
+      const controller = Controller(getModel, getSchemaObject, getPolicy);
+
+
+      const callback = (err, data) => {};
+      controller.update(fakeRequest, callback);
+
+      // console.log({fakeRequest});
+      // expect(getResourceNameSpy.withArgs(fakeRequest).called).to.be.true;
+
+      // expect(findOneSpy.withArgs({ slug: requestParamSlug}, callback).calledOnce).to.be.true;
+
+      
+    });
+  });
 });
