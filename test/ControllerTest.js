@@ -54,7 +54,8 @@ describe('Controller', () => {
         sort: 'price,rate',
         asc: 'rate',
         desc: 'price'
-      }
+      },
+      params: {}
     };
 
     actionFunction = (action) => cursorSetter;

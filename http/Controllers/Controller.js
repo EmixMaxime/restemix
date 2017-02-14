@@ -57,8 +57,11 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
 
       const user = req.jwt;
 
-      let q = model.findOne({}, restFilter);
-      buildQuery(q, restCursor, cursorSetters);;
+      const query = { slug: req.params[resource] };
+
+      // db.collection.findOne(query, projection)
+      let q = model.findOne(query, restFilter);
+      buildQuery(q, restCursor, cursorSetters);
 
       q.exec((err, data) => {
         if (!cancan(user)('show')(data)) return callback(null, null, failedReason.can);
