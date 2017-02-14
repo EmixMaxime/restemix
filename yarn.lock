@@ -19,6 +19,10 @@ browser-stdout@1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/browser-stdout/-/browser-stdout-1.3.0.tgz#f351d32969d32fa5d7a5567154263d928ae3bd1f"
 
+cancancan:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/cancancan/-/cancancan-1.0.2.tgz#9db8d122e0b3f4d6c8c1e253ed1020bc560c9bd6"
+
 chai:
   version "3.5.0"
   resolved "https://registry.yarnpkg.com/chai/-/chai-3.5.0.tgz#4d02637b067fe958bdbfdd3a40ec56fef7373247"
