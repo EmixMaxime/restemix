@@ -2,20 +2,32 @@ const chai   = require('chai');
 const sinon  = require('sinon');
 const expect = chai.expect;
 
+const getResourceName = require('../http/Controllers/utils/getResourceName.js');
+
+const controllerServiceProvider = require('../http/Controllers/ControllerServiceProvider').controllerServiceProvider;
+
 // import Controller from '../http/Controllers/Controller';
 
-const getResourceNameMock = function (resourceName = 'categories') {
-  const getResourceName = () => {};
+const getResourceNameMock = function (fakeRequest, resourceName = 'categories') {
   const getResourceNameMock = sinon.expectation.create(getResourceName);
   getResourceNameMock
     .once()
-    .withArgs(resourceName)
+    .withArgs(fakeRequest)
     .returns(resourceName); // Return the parameter resourceName
   return getResourceNameMock;
-}
+};
 
-describe.skip('Controller', () => {
-  describe('#index, #show called getRestFilters', () => {
+const getRestFiltersMock = function (fakeRequest, fakeAction) {
+  const fakeActionFunction = (action) => {};
+  const fakeRequestFunction = (req) => fakeActionFunction;
+
+  sinon.spy(fakeActionFunction);
+  sinon.spy(fakeRequestFunction);
+};
+
+describe('Controller', () => {
+
+  describe.skip('#index, #show called getRestFilters', () => {
     it('It should call getRestFilters function with the request and call the returns function with action index', () => {
       const callback = () => {};
       const getResourceName = getResourceNameMock();
@@ -23,4 +35,67 @@ describe.skip('Controller', () => {
       controller.show(req, callback);
     });
   });
+
+  describe('#index', () => {
+    it('It should call the model with the cursor setters (limit, sort)', () => {
+      const projection = { title: true };
+      let actionFunction = (action) => projection;
+      const getRestFilters = (req) => actionFunction;
+
+      const limitValue = 5;
+      const sortValue = { price: -1, rate: 1 };
+      const cursorSetter = {
+        limit: limitValue,
+        sort: sortValue
+      };
+
+      const fakeRequest = {
+        query: {
+          limit: 5,
+          sort: 'price,rate',
+          asc: 'rate',
+          desc: 'price'
+        }
+      };
+
+      actionFunction = (action) => cursorSetter;
+      const getRestCursor = (req) => actionFunction;
+
+      const getPolicy = () => {};
+      const updateDatabase = () => {};
+      const fillSchema = () => {};
+      const Cancan = () => {};
+      const getSchemaObject = () => {};
+      const getResourceName = () => {};
+
+      const fakeModel = {
+        find: () => fakeModel,
+        limit: (num) => {},
+        sort: (num) => {},
+        exec: (cb) => {},
+      };
+
+      const limitSpy = sinon.spy(fakeModel, 'limit');
+      const sortSpy = sinon.spy(fakeModel, 'sort');
+      const execSpy = sinon.spy(fakeModel, 'exec');
+
+      const getModel = () => {
+        return fakeModel
+      };
+
+      const Controller = controllerServiceProvider({
+        getRestFilters, getRestCursor, getResourceName, updateDatabase, fillSchema,
+        Cancan
+      });
+
+      const controller = Controller(getModel, getSchemaObject, getPolicy);
+
+      controller.index(fakeRequest, () => {});
+
+      expect(sortSpy.withArgs(sortValue).calledOnce).to.be.true;
+      expect(limitSpy.withArgs(limitValue).calledOnce).to.be.true;
+      expect(execSpy.calledOnce).to.be.true;
+
+    });
+  })
 });
