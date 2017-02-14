@@ -7,6 +7,17 @@
 // getModel et getSchemaObject sont injectés dans RestController de l'application ;-)
 const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateDatabase, fillSchema, Cancan }, getModel, getSchemaObject, getPolicy) => {
 
+  const buildQuery = function (query, restCursor, cursorSetters) {
+    cursorSetters.forEach(cursorSetter => {
+      const value = restCursor[cursorSetter];
+      query[cursorSetter](value);
+    });
+  };
+
+  const failedReason = {
+    can: false, // The user can't processing this query !
+  }
+
   return {
     index (req, callback) {
       const restFilter = getRestFilters(req)('index');
@@ -20,14 +31,14 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
       const user = req.jwt;
 
       // Prepare the query with the cursor setters (limit, sort)
+      // The first {} it will be the where clause (?where:price>5)
+      // It will come in the future version (not now!)
       let q = model.find({}, restFilter);
-      cursorSetters.forEach(cursorSetter => {
-        const value = restCursor[cursorSetter];
-        q[cursorSetter](value);
-      });
+      buildQuery(q, restCursor, cursorSetters);
+
 
       q.exec((err, data) => {
-        if (!cancan(user)('show')(data)) return callback(null, null, { can: false });
+        if (!cancan(user)('index')(data)) return callback(null, null, failedReason.can);
         
         if (err) return callback(err, null);
         if (data === null) return callback(null, null);
@@ -37,14 +48,24 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
     },
     show (req, callback) {
       const restFilter = getRestFilters(req)('show');
+      const restCursor = getRestCursor(req)('show');
+      const cursorSetters = Object.keys(restCursor); // [limit, sort]
+      
       const resource = getResourceName(req);
-      const cancan = Cancan(getPolicy(name)); // Okay, on travaille avec cette politique qui est lié à la resource de la requête
+      const cancan = Cancan(getPolicy(resource)); // Okay, on travaille avec cette politique qui est lié à la resource de la requête
       const model = getModel(resource);
 
-      model.findOne({}, restFilter, (err, data) => {
-        if (err) return callback(err, null);
-        if (data === null) return callback(null, null);
-        return callback(null, data);
+      const user = req.jwt;
+
+      let q = model.findOne({}, restFilter);
+      buildQuery(q, restCursor, cursorSetters);;
+
+      q.exec((err, data) => {
+        if (!cancan(user)('show')(data)) return callback(null, null, failedReason.can);
+
+        if (err) return callback(err, null, null);
+        if (data === null) return callback(null, null, null);
+        return callback(null, data, null);
       });
 
     },
