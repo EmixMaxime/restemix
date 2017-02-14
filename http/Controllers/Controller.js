@@ -101,6 +101,45 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
 
     },
 
+    create (req, callback) {
+      const resourceName = getResourceName(req);
+      const model = getModel(resourceName);
+
+      const schemaObject = getSchemaObject(resourceName);
+      
+      const cancan = Cancan(getPolicy(resourceName));
+      const user = req.jwt;
+
+      const body = fillSchema(schemaObject)(req.body);
+      if (!cancan(user)('create')()) return callback(null, null, cannot);
+
+      model.create(body, (err, data) => {
+        if (err) return callback(err);
+        return callback(null, data);
+      });
+      
+    },
+
+    delete (req, callback) {
+      const resource = getResourceName(req);
+      const model = getModel(resource);
+
+      const cancan = Cancan(getPolicy(resource));
+      const user = req.jwt;
+      
+      const query = { slug: req.params[resource] };
+
+      model.findOne(query, (err, data) => {
+        if (!cancan(user)('delete')(data)) return callback(null, null, cannot);
+
+        if (err) return callback(err, null, null);
+        if (data === null) return callback(null, null, null);
+        
+        data.remove((err) => {
+          return callback(null, true, null);
+        });
+      });
+    }
   }
 };
 
