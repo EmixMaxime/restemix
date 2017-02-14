@@ -14,7 +14,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
     });
   };
 
-  const failedReason = {
+  const cannot = {
     can: false, // The user can't processing this query !
   }
 
@@ -38,7 +38,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
 
 
       q.exec((err, data) => {
-        if (!cancan(user)('index')(data)) return callback(null, null, failedReason.can);
+        if (!cancan(user)('index')(data)) return callback(null, null, cannot);
         
         if (err) return callback(err, null);
         if (data === null) return callback(null, null);
@@ -64,7 +64,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
       buildQuery(q, restCursor, cursorSetters);
 
       q.exec((err, data) => {
-        if (!cancan(user)('show')(data)) return callback(null, null, failedReason.can);
+        if (!cancan(user)('show')(data)) return callback(null, null, cannot);
 
         if (err) return callback(err, null, null);
         if (data === null) return callback(null, null, null);
@@ -78,19 +78,29 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
       const model = getModel(resource);
       const schemaObject = getSchemaObject(resource);
 
+      const cancan = Cancan(getPolicy(resource));
+      
+      const user = req.jwt;
+      
       const body =  fillSchema(schemaObject)(req.body);
-      const filter = { slug: req.params[resource] };
+      const query = { slug: req.params[resource] };
 
-      model.findOne(filter, (err, data) => {
-        // The user can to that ?
+      model.findOne(query, (err, data) => {
+        if (!cancan(user)('update')(data)) return callback(null, null, cannot);
+
+        if (err) return callback(err, null, null);
+        if (data === null) return callback(null, null, null);
+        
+        // Update with new data
+        data = Object.assign({}, data, body);
+        data.save((err, updatedData) => {
+          return callback(null, updatedData, null);
+        });
+
       });
 
-      // updateDatabase(Model, filter, body, (err, data) => {
-      // const error = controller.mongoErrors.verify(err);
-      // if (error) return res.sendStatus(400);
-    
-      // return res.status(200).json(data);
-    }
+    },
+
   }
 };
 
