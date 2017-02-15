@@ -51,7 +51,7 @@ const RestCursor = function ({ _includes }) {
         sortCursor[a] = 1;
       });
 
-      return restCursor(req, Object.assign({}, cursor, sortCursor));
+      return restCursor(req, Object.assign({}, cursor, { sort: sortCursor }));
     },
 
     get: () => cursor

@@ -25,7 +25,7 @@ describe('RestCursor', () => {
         desc: 'title',
         asc: 'author,date'
       };
-      const expectedCursor = { title: -1, author: 1, date: 1 };
+      const expectedCursor = { sort: {title: -1, author: 1, date: 1 } };
 
       const fakeRequest = {
         query: sortQuery
@@ -41,7 +41,7 @@ describe('RestCursor', () => {
         sort: 'title,author,date',
         desc: 'title,author,date',
       };
-      const expectedCursor = { title: -1, author: -1, date: -1 };
+      const expectedCursor = { sort: { title: -1, author: -1, date: -1 } };
 
       const fakeRequest = {
         query: sortQuery
