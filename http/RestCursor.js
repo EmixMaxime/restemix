@@ -53,7 +53,7 @@ const GetRestCursor = function ({ restCursor }) {
     return (action) => {
       switch (action) {
         case 'index':
-          return restCursor(req).limit().get();
+          return restCursor(req).limit().sort().get();
           break;
       }
     }
