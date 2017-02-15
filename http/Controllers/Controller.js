@@ -38,11 +38,11 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
 
 
       q.exec((err, data) => {
-        if (!cancan(user)('index')(data)) return callback(null, null, cannot);
+        if (cancan(user)('index')(data) === false) return callback(null, null, cannot);
         
-        if (err) return callback(err, null);
-        if (data === null) return callback(null, null);
-        return callback(null, data);
+        if (err) return callback(err, null, null);
+        if (data === null) return callback(null, null, null);
+        return callback(null, data, null);
       });
 
     },
@@ -58,7 +58,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
       // db.collection.findOne(query, projection) restFilter = projection
       const q = model.findOne(query, restFilter);
       q.exec((err, data) => {
-        if (!cancan(user)('show')(data)) return callback(null, null, cannot);
+        if (cancan(user)('show')(data) === false) return callback(null, null, cannot);
         if (err) return callback(err, null, null);
         if (data === null) return callback(null, null, null);
 
@@ -78,14 +78,14 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
       const query = { slug: req.params[resource] };
 
       model.findOne(query, (err, data) => {
-        if (!cancan(user)('update')(data)) return callback(null, null, cannot);
+        if (cancan(user)('update')(data) === false) return callback(null, null, cannot);
         if (err) return callback(err, null, null);
         if (data === null) return callback(null, null, null);
         
         // Update with new data
         data = Object.assign({}, data, body);
         data.save((err, updatedData) => {
-          if (err) return callback(err);
+          if (err) return callback(err, null, null);
           return callback(null, updatedData, null);
         });
 
@@ -101,11 +101,11 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
       const user = req.jwt;
 
       const body = fillSchema(schemaObject)(req.body);
-      if (!cancan(user)('create')()) return callback(null, null, cannot); // TODO: peut poser problème
+      if (cancan(user)('create')() === false) return callback(null, null, cannot); // TODO: peut poser problème
 
       model.create(body, (err, data) => {
-        if (err) return callback(err);
-        return callback(null, data);
+        if (err) return callback(err, null, null);
+        return callback(null, data, null);
       });
       
     },
@@ -119,12 +119,12 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
       const query = { slug: req.params[resource] };
 
       model.findOne(query, (err, data) => {
-        if (!cancan(user)('delete')(data)) return callback(null, null, cannot);
-        if (err) return callback(err);
+        if (cancan(user)('delete')(data) === false) return callback(null, null, cannot);
+        if (err) return callback(err, null, null);
         if (data === null) return callback(null, null, null);
         
         data.remove((err) => {
-          if (err) return callback(err);
+          if (err) return callback(err, null, null);
           return callback(null, true, null);
         });
       });
