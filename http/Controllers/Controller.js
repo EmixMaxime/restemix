@@ -48,26 +48,20 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
     },
     show (req, callback) {
       const restFilter = getRestFilters(req)('show');
-      const restCursor = getRestCursor(req)('show');
-      const cursorSetters = Object.keys(restCursor); // [limit, sort]
-      
       const resource = getResourceName(req);
       const cancan = Cancan(getPolicy(resource)); // Okay, on travaille avec cette politique qui est lié à la resource de la requête
       const model = getModel(resource);
-
       const user = req.jwt;
 
       const query = { slug: req.params[resource] };
 
-      // db.collection.findOne(query, projection)
-      let q = model.findOne(query, restFilter);
-      buildQuery(q, restCursor, cursorSetters);
-
+      // db.collection.findOne(query, projection) restFilter = projection
+      const q = model.findOne(query, restFilter);
       q.exec((err, data) => {
         if (!cancan(user)('show')(data)) return callback(null, null, cannot);
-
         if (err) return callback(err, null, null);
         if (data === null) return callback(null, null, null);
+
         return callback(null, data, null);
       });
 
@@ -77,9 +71,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
       const resource = getResourceName(req);
       const model = getModel(resource);
       const schemaObject = getSchemaObject(resource);
-
       const cancan = Cancan(getPolicy(resource));
-      
       const user = req.jwt;
       
       const body =  fillSchema(schemaObject)(req.body);
@@ -87,13 +79,13 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
 
       model.findOne(query, (err, data) => {
         if (!cancan(user)('update')(data)) return callback(null, null, cannot);
-
         if (err) return callback(err, null, null);
         if (data === null) return callback(null, null, null);
         
         // Update with new data
         data = Object.assign({}, data, body);
         data.save((err, updatedData) => {
+          if (err) return callback(err);
           return callback(null, updatedData, null);
         });
 
@@ -104,14 +96,12 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
     create (req, callback) {
       const resourceName = getResourceName(req);
       const model = getModel(resourceName);
-
       const schemaObject = getSchemaObject(resourceName);
-      
       const cancan = Cancan(getPolicy(resourceName));
       const user = req.jwt;
 
       const body = fillSchema(schemaObject)(req.body);
-      if (!cancan(user)('create')()) return callback(null, null, cannot);
+      if (!cancan(user)('create')()) return callback(null, null, cannot); // TODO: peut poser problème
 
       model.create(body, (err, data) => {
         if (err) return callback(err);
@@ -123,7 +113,6 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
     delete (req, callback) {
       const resource = getResourceName(req);
       const model = getModel(resource);
-
       const cancan = Cancan(getPolicy(resource));
       const user = req.jwt;
       
@@ -131,11 +120,11 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
 
       model.findOne(query, (err, data) => {
         if (!cancan(user)('delete')(data)) return callback(null, null, cannot);
-
-        if (err) return callback(err, null, null);
+        if (err) return callback(err);
         if (data === null) return callback(null, null, null);
         
         data.remove((err) => {
+          if (err) return callback(err);
           return callback(null, true, null);
         });
       });
