@@ -6,6 +6,14 @@ const getResourceName = require('../http/Controllers/utils/getResourceName.js');
 
 const controllerServiceProvider = require('../http/Controllers/ControllerServiceProvider').controllerServiceProvider;
 
+const controller = require('../index');
+
+describe('index.js', () => {
+  it('It should export my controller', () => {
+    expect(typeof controller).to.equal('function');
+  });
+});
+
 // import Controller from '../http/Controllers/Controller';
 
 const getResourceNameMock = function (fakeRequest, resourceName = 'categories') {
@@ -36,6 +44,62 @@ describe('Controller', () => {
     });
   });
 
+  describe.skip('All methods call properly cancan', () => {
+    const getRestFilters = () => () => { return {} };
+    const getRestCursor = getRestFilters;
+
+    const getResourceName = () => {};
+
+    const fakePolicy = {};
+    const getPolicy = function (resourceName) {
+      return fakePolicy;
+    };
+
+    const cancanData = (data) => true;
+    const cancanAction = (action) => { console.log({action}); return cancanData};
+    const cancanUser = (user) => cancanAction;
+    const CanCan = function (policy) {
+      return cancanUser;
+    };
+
+    const cancanDataSpy = sinon.spy(cancanData);
+    const cancanActionSpy = sinon.spy(cancanAction);
+    const cancanUserSpy = sinon.spy(cancanUser);
+
+    const fakeData = {
+      title: 'Who is emix?'
+    };
+
+    const fakeModel = {
+      find: () => fakeModel,
+      exec: (callback) => callback(null, fakeData)
+    };
+    const getModel = () => fakeModel;
+
+    const fakeRequest = {
+      jwt: 'emix',
+    };
+
+    const fillSchema = () => {};
+
+    const Controller = controllerServiceProvider({
+        getResourceName, getRestCursor, getRestFilters, fillSchema,
+        CanCan
+    });
+
+    const controller = Controller(getModel, () => {}, getPolicy);
+
+    const fakeCallback = () => {};
+    controller.index(fakeRequest, fakeCallback);
+
+
+    console.log(cancanActionSpy.callCount);// POURQUOI 0....
+    expect(cancanActionSpy.calledWith('index')).to.be.false;
+
+    expect(cancanDataSpy.withArgs(fakeData).called).to.be.false;
+    
+  });
+
   describe('It should call the model with the cursor setters (limit, sort)', () => {
     const projection = { title: true };
     let actionFunction = (action) => projection;
@@ -64,7 +128,7 @@ describe('Controller', () => {
     const getPolicy = () => {};
     const updateDatabase = () => {};
     const fillSchema = () => {};
-    const Cancan = () => {};
+    const CanCan = () => {};
     const getSchemaObject = () => {};
     const getResourceName = () => {};
 
@@ -88,7 +152,7 @@ describe('Controller', () => {
 
       const Controller = controllerServiceProvider({
         getRestFilters, getRestCursor, getResourceName, updateDatabase, fillSchema,
-        Cancan
+        CanCan
       });
 
       const controller = Controller(getModel, getSchemaObject, getPolicy);

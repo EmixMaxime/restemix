@@ -5,7 +5,13 @@
 // }
 
 // getModel et getSchemaObject sont injectés dans RestController de l'application ;-)
-const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateDatabase, fillSchema, Cancan }, getModel, getSchemaObject, getPolicy) => {
+const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema, CanCan }, getModel, getSchemaObject, getPolicy) => {
+
+  // Validate the dependencies needs to be function
+  const functionDeps = { getRestFilters, getRestCursor, getResourceName, fillSchema, CanCan, getModel, getSchemaObject, getPolicy };
+  Object.keys(functionDeps).forEach(dep => {
+    if (typeof functionDeps[dep] !== 'function') throw new Error(`${dep} must be a function ! But it's a ${typeof dep}`);
+  });
 
   const buildQuery = function (query, restCursor, cursorSetters) {
     cursorSetters.forEach(cursorSetter => {
@@ -25,7 +31,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
       const cursorSetters = Object.keys(restCursor); // [limit, sort]
 
       const resource = getResourceName(req);
-      const cancan = Cancan(getPolicy(resource)); // Okay, on travaille avec cette politique qui est lié à la resource de la requête
+      const cancan = CanCan(getPolicy(resource)); // Okay, on travaille avec cette politique qui est lié à la resource de la requête
       const model = getModel(resource);
 
       const user = req.jwt;
@@ -49,7 +55,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
     show (req, callback) {
       const restFilter = getRestFilters(req)('show');
       const resource = getResourceName(req);
-      const cancan = Cancan(getPolicy(resource)); // Okay, on travaille avec cette politique qui est lié à la resource de la requête
+      const cancan = CanCan(getPolicy(resource)); // Okay, on travaille avec cette politique qui est lié à la resource de la requête
       const model = getModel(resource);
       const user = req.jwt;
 
@@ -71,7 +77,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
       const resource = getResourceName(req);
       const model = getModel(resource);
       const schemaObject = getSchemaObject(resource);
-      const cancan = Cancan(getPolicy(resource));
+      const cancan = CanCan(getPolicy(resource));
       const user = req.jwt;
       
       const body =  fillSchema(schemaObject)(req.body);
@@ -97,7 +103,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
       const resourceName = getResourceName(req);
       const model = getModel(resourceName);
       const schemaObject = getSchemaObject(resourceName);
-      const cancan = Cancan(getPolicy(resourceName));
+      const cancan = CanCan(getPolicy(resourceName));
       const user = req.jwt;
 
       const body = fillSchema(schemaObject)(req.body);
@@ -113,7 +119,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, updateData
     delete (req, callback) {
       const resource = getResourceName(req);
       const model = getModel(resource);
-      const cancan = Cancan(getPolicy(resource));
+      const cancan = CanCan(getPolicy(resource));
       const user = req.jwt;
       
       const query = { slug: req.params[resource] };
