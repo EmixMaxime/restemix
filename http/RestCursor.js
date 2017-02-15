@@ -1,5 +1,13 @@
 const _includes = require('lodash/includes');
 
+function BadRequestError (msg) {
+  this.name = 'BadRequestError';
+  this.message = msg;
+  this.stack = (new Error()).stack;
+}
+BadRequestError.prototype = Object.create(Error.prototype);
+BadRequestError.prototype.constructor = BadRequestError;
+
 const RestCursor = function ({ _includes }) {
 
   return (req, cursor = {}) => ({
@@ -15,16 +23,21 @@ const RestCursor = function ({ _includes }) {
       let { sort, desc, asc } = req.query;
       if (!sort) return restCursor(req, cursor);
 
-      desc = desc.split(',');
-      asc = asc.split(',');
+      // Just in case... But query it's always a string no?
+      if (typeof sort !== 'string') throw new BadRequestError(`sort query must be a string, but it's a ${typeof sort}`);
+      if (desc !== undefined && typeof desc !== 'string') throw new BadRequestError(`desc query must be a string, but it's a ${typeof desc}`);
+      if (asc !== undefined && typeof asc !== 'string') throw new BadRequestError(`asc query must be a string, but it's a ${typeof asc}`);
+
+      desc = desc !== undefined ? desc.split(',') : [];
+      asc = asc !== undefined ? asc.split(',') : [];
 
       // Un champ ne peut pas être dans desc et asc -> erreur de requête
       // Un champ doit être dans sort si il est dans asc|desc
       desc.forEach(d => {
-        if (!_includes(sort, d)) throw new Error();
+        if (!_includes(sort, d)) throw new BadRequestError('Desc query must be into sort query');
         asc.forEach(a => {
-          if (!_includes(sort, a)) throw new Error();
-          if (d === a) throw new Error();
+          if (!_includes(sort, a)) throw new BadRequestError('Asc query must be into sort query');
+          if (d === a) throw new BadRequestError('Desc fields query can\'t be into asc fields query');
         });
       });
 
