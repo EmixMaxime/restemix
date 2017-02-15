@@ -2,7 +2,7 @@ const _includes = require('lodash/includes');
 
 const RestCursor = function ({ _includes }) {
 
-  return (req, cursor) => ({
+  return (req, cursor = {}) => ({
     limit () {
       if (!req.query.limit) return restCursor(req, cursor);
       const limit = { limit: parseInt(req.query.limit) };
