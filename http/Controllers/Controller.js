@@ -2,7 +2,7 @@ const CannotException = require('./Exceptions/CannotException');
 const RestEmixException = require('./Exceptions/RestEmixException');
 
 // getModel et getSchemaObject sont injectés dans RestController de l'application ;-)
-const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema, CanCan }, getModel, getSchemaObject, getPolicy) => {
+const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema, CanCan, _merge }, getModel, getSchemaObject, getPolicy) => {
 
   // Validate the dependencies needs to be function
   const functionDeps = { getRestFilters, getRestCursor, getResourceName, fillSchema, CanCan, getModel, getSchemaObject, getPolicy };
@@ -85,8 +85,8 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
 
       if (cancan(user)('update')(data) === false) throw new CannotException();
 
-      const updateData = Object.assign({}, data, body);
-      return updateData.save();
+      _merge(data, body);
+      return data.save();
     },
 
     async create(req, callback) {

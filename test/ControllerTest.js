@@ -218,9 +218,11 @@ describe('Controller', () => {
         return () => () => () => true;
       };
 
+      const _merge = () => {};
+
       return controllerServiceProvider({
         getRestFilters, getRestCursor, getResourceName, fillSchema,
-        CanCan
+        CanCan, _merge
       });
     };
 
@@ -239,7 +241,8 @@ describe('Controller', () => {
       return Promise.all([resultIndex, resultShow, resultUpdate]).then(([resultIndex, resultShow, resultUpdate]) => {
         expect(resultIndex.fakeData).to.deep.equal(fakeData);
         expect(resultShow.fakeData).to.deep.equal(fakeData);
-        expect(resultUpdate.fakeData).to.deep.equal(fakeData);
+        /** Because I work on save function, which returns fakeData only, not a object with fakeData as key */
+        expect(resultUpdate).to.deep.equal(fakeData);
       });
 
     });
