@@ -86,7 +86,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       if (cancan(user)('update')(data) === false) throw new CannotException();
 
       const updateData = Object.assign({}, data, body);
-      return data.save();
+      return updateData.save();
     },
 
     async create(req, callback) {
