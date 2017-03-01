@@ -140,12 +140,14 @@ describe('Controller', () => {
     const getSchemaObject = () => { };
     const getResourceName = () => { };
 
+    const fakeData = { };
+
     const fakeModel = {
       find: () => fakeModel,
       findOne: () => fakeModel,
       limit: (num) => { },
       sort: (num) => { },
-      exec: (cb) => { },
+      exec: (cb) => fakeData,
     };
 
     const getModel = () => {

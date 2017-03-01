@@ -1,5 +1,6 @@
 const CannotException = require('./Exceptions/CannotException');
 const RestEmixException = require('./Exceptions/RestEmixException');
+const NotFoundException = require('./Exceptions/NotFoundException');
 
 // getModel et getSchemaObject sont injectés dans RestController de l'application ;-)
 const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema, CanCan, _merge }, getModel, getSchemaObject, getPolicy) => {
@@ -45,10 +46,10 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
 
       const data = await q.exec();
 
-      if (cancan(userReq)('index')(data) === false) {
-        // The user can't do that, he's unauthorized
-        throw new CannotException();
-      }
+      if (!data) throw new NotFoundException();
+
+      // The user can't do that, he's unauthorized
+      if (cancan(userReq)('index')(data) === false) throw new CannotException();
 
       return data;
     },
@@ -70,7 +71,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       return data;
     },
 
-    async update(req, callback) {
+    async update (req) {
       const resource = getResourceName(req);
       const model = getModel(resource);
       const schemaObject = getSchemaObject(resource);
@@ -83,13 +84,15 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       const q = model.findOne(query);
       const data = await q.exec();
 
+      if (!data) throw new NotFoundException();
+
       if (cancan(user)('update')(data) === false) throw new CannotException();
 
       _merge(data, body);
       return data.save();
     },
 
-    async create(req, callback) {
+    async create (req) {
       const resourceName = getResourceName(req);
       const model = getModel(resourceName);
       const schemaObject = getSchemaObject(resourceName);
@@ -104,7 +107,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       return data;
     },
 
-    async delete(req, callback) {
+    async delete (req) {
       const resource = getResourceName(req);
       const model = getModel(resource);
       const cancan = CanCan(getPolicy(resource));
@@ -115,10 +118,12 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       const q = model.findOne(query);
       const data = await q.exec();
 
+      if (!data) throw new NotFoundException();
+
       if (cancan(user)('delete')(data) === false) throw new CannotException();
 
       return data.remove();
-    }
+    },
   }
 };
 
