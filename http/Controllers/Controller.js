@@ -66,6 +66,8 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       const q = model.findOne(query, restFilter);
       const data = await q.exec();
 
+      if (!data) throw new NotFoundException();
+
       if (cancan(user)('show')(data) === false) throw new CannotException();
 
       return data;
