@@ -1,6 +1,6 @@
-const CannotException = require('./Exceptions/CannotException');
+const Cannot = require('./Exceptions/Cannot');
 const RestEmixException = require('./Exceptions/RestEmixException');
-const NotFoundException = require('./Exceptions/NotFoundException');
+const NotFound = require('./Exceptions/NotFound');
 
 // getModel et getSchemaObject sont injectés dans RestController de l'application ;-)
 const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema, CanCan, _merge }, getModel, getSchemaObject, getPolicy) => {
@@ -46,10 +46,10 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
 
       const data = await q.exec();
 
-      if (!data) throw new NotFoundException();
+      if (!data) throw new NotFound();
 
       // The user can't do that, he's unauthorized
-      if (cancan(userReq)('index')(data) === false) throw new CannotException();
+      if (cancan(userReq)('index')(data) === false) throw new Cannot();
 
       return data;
     },
@@ -66,9 +66,9 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       const q = model.findOne(query, restFilter);
       const data = await q.exec();
 
-      if (!data) throw new NotFoundException();
+      if (!data) throw new NotFound();
 
-      if (cancan(user)('show')(data) === false) throw new CannotException();
+      if (cancan(user)('show')(data) === false) throw new Cannot();
 
       return data;
     },
@@ -86,9 +86,9 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       const q = model.findOne(query);
       const data = await q.exec();
 
-      if (!data) throw new NotFoundException();
+      if (!data) throw new NotFound();
 
-      if (cancan(user)('update')(data) === false) throw new CannotException();
+      if (cancan(user)('update')(data) === false) throw new Cannot();
 
       _merge(data, body);
       return data.save();
@@ -103,7 +103,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
 
       const body = fillSchema(schemaObject)(req.body);
 
-      if (cancan(user)('create')() === false) throw new CannotException(); // TODO: peut poser problème
+      if (cancan(user)('create')() === false) throw new Cannot(); // TODO: peut poser problème
 
       const data = await model.create(body);
       return data;
@@ -120,9 +120,9 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       const q = model.findOne(query);
       const data = await q.exec();
 
-      if (!data) throw new NotFoundException();
+      if (!data) throw new NotFound();
 
-      if (cancan(user)('delete')(data) === false) throw new CannotException();
+      if (cancan(user)('delete')(data) === false) throw new Cannot();
 
       return data.remove();
     },

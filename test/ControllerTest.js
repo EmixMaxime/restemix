@@ -5,7 +5,7 @@ const expect = chai.expect;
 
 chai.use(chaiAsPromised);
 
-const CannotException = require('../http/Controllers/Exceptions/CannotException');
+const Cannot = require('../http/Controllers/Exceptions/Cannot');
 
 const getResourceName = require('../http/Controllers/utils/getResourceName.js');
 
@@ -249,7 +249,7 @@ describe('Controller', () => {
 
     });
 
-    it('It should throw a CannotException', () => {
+    it('It should throw a Cannot', () => {
       const CanCan = function () {
         return () => () => () => false; // Simulate, the user cannot do everything
       };
@@ -261,11 +261,11 @@ describe('Controller', () => {
       const resultShow = controller.show(fakeRequest);
       const resultUpdate = controller.update(fakeRequest);
       return Promise.all([
-        expect(resultIndex).to.be.rejectedWith(CannotException),
-        expect(resultShow).to.be.rejectedWith(CannotException),
-        expect(resultUpdate).to.be.rejectedWith(CannotException),
+        expect(resultIndex).to.be.rejectedWith(Cannot),
+        expect(resultShow).to.be.rejectedWith(Cannot),
+        expect(resultUpdate).to.be.rejectedWith(Cannot),
       ]);
-      // return expect(resultPromise).to.be.rejectedWith(CannotException);
+      // return expect(resultPromise).to.be.rejectedWith(Cannot);
     });
 
 
