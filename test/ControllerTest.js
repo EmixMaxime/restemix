@@ -5,7 +5,7 @@ const expect = chai.expect;
 
 chai.use(chaiAsPromised);
 
-const Cannot = require('../http/Controllers/Exceptions/Cannot');
+const Cannot = require('../http/Controllers/Exceptions/CannotError');
 
 const getResourceName = require('../http/Controllers/utils/getResourceName.js');
 
