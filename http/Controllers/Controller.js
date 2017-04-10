@@ -1,6 +1,6 @@
-const Cannot = require('./Exceptions/Cannot');
+const CannotError = require('./Exceptions/CannotError');
 const RestEmixException = require('./Exceptions/RestEmixException');
-const NotFound = require('./Exceptions/NotFound');
+const NotFoundError = require('./Exceptions/NotFoundError');
 
 // getModel et getSchemaObject sont injectés dans RestController de l'application ;-)
 const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema, CanCan, _merge }, getModel, getSchemaObject, getPolicy) => {
@@ -12,7 +12,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
   });
 
   return {
-    async index (req) {
+    async index (req, { user } = {}) {
       const restFilter = getRestFilters(req)('index');
       const restCursor = getRestCursor(req)('index'); // { limit: 5, sort: { price: -1 } }
       const cursorSetters = Object.keys(restCursor); // [limit, sort]
@@ -23,8 +23,6 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       const resource = getResourceName(req);
       const cancan = CanCan(getPolicy(resource)); // Okay, on travaille avec cette politique qui est lié à la resource de la requête
       const model = getModel(resource);
-
-      const userReq = req.jwt;
 
       // Prepare the query with the cursor setters (limit, sort)
       // The first {} it will be the where clause (?where:price>5)
@@ -46,19 +44,19 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
 
       const data = await q.exec();
 
-      if (!data) throw new NotFound();
+      if (!data) throw new NotFoundError();
 
       // The user can't do that, he's unauthorized
-      if (cancan(userReq)('index')(data) === false) throw new Cannot();
+      if (cancan(user)('index')(data) === false) throw new CannotError();
 
       return data;
     },
-    async show(req) {
+
+    async show(req, { user } = {}) {
       const restFilter = getRestFilters(req)('show');
       const resource = getResourceName(req);
       const cancan = CanCan(getPolicy(resource)); // Okay, on travaille avec cette politique qui est lié à la resource de la requête
       const model = getModel(resource);
-      const user = req.jwt;
 
       const query = { slug: req.params[resource] };
 
@@ -66,19 +64,18 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       const q = model.findOne(query, restFilter);
       const data = await q.exec();
 
-      if (!data) throw new NotFound();
+      if (!data) throw new NotFoundError();
 
-      if (cancan(user)('show')(data) === false) throw new Cannot();
+      if (cancan(user)('show')(data) === false) throw new CannotError();
 
       return data;
     },
 
-    async update (req) {
+    async update (req, { user } = {}) {
       const resource = getResourceName(req);
       const model = getModel(resource);
       const schemaObject = getSchemaObject(resource);
       const cancan = CanCan(getPolicy(resource));
-      const user = req.jwt;
 
       const body = fillSchema(schemaObject)(req.body);
       const query = { slug: req.params[resource] };
@@ -86,43 +83,40 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       const q = model.findOne(query);
       const data = await q.exec();
 
-      if (!data) throw new NotFound();
+      if (!data) throw new NotFoundError();
 
-      if (cancan(user)('update')(data) === false) throw new Cannot();
+      if (cancan(user)('update')(data) === false) throw new CannotError();
 
       _merge(data, body);
       return data.save();
     },
 
-    async create (req) {
+    async create (req, { user } = {}) {
       const resourceName = getResourceName(req);
       const model = getModel(resourceName);
       const schemaObject = getSchemaObject(resourceName);
       const cancan = CanCan(getPolicy(resourceName));
-      const user = req.jwt;
 
       const body = fillSchema(schemaObject)(req.body);
 
-      if (cancan(user)('create')() === false) throw new Cannot(); // TODO: peut poser problème
+      if (cancan(user)('create')() === false) throw new CannotError(); // TODO: peut poser problème
 
-      const data = await model.create(body);
-      return data;
+      return model.create(body);
     },
 
-    async delete (req) {
+    async delete (req, { user } = {}) {
       const resource = getResourceName(req);
       const model = getModel(resource);
       const cancan = CanCan(getPolicy(resource));
-      const user = req.jwt;
 
       const query = { slug: req.params[resource] };
 
       const q = model.findOne(query);
       const data = await q.exec();
 
-      if (!data) throw new NotFound();
+      if (!data) throw new NotFoundError();
 
-      if (cancan(user)('delete')(data) === false) throw new Cannot();
+      if (cancan(user)('delete')(data) === false) throw new CannotError();
 
       return data.remove();
     },
