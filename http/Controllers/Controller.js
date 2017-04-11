@@ -71,14 +71,14 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       return data;
     },
 
-    async update (req, { user } = {}) {
+    async update (req, { user, query } = {}) {
       const resource = getResourceName(req);
       const model = getModel(resource);
       const schemaObject = getSchemaObject(resource);
       const cancan = CanCan(getPolicy(resource));
 
       const body = fillSchema(schemaObject)(req.body);
-      const query = { slug: req.params[resource] };
+      if (!query) query = { slug: req.params.slug };
 
       const q = model.findOne(query);
       const data = await q.exec();
@@ -104,12 +104,12 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       return model.create(body);
     },
 
-    async delete (req, { user } = {}) {
+    async delete (req, { user, query } = {}) {
       const resource = getResourceName(req);
       const model = getModel(resource);
       const cancan = CanCan(getPolicy(resource));
 
-      const query = { slug: req.params[resource] };
+      if (!query) query = { slug: req.params.slug };
 
       const q = model.findOne(query);
       const data = await q.exec();
