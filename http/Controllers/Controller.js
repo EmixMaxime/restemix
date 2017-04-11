@@ -52,13 +52,13 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       return data;
     },
 
-    async show(req, { user } = {}) {
+    async show(req, { user, query } = {}) {
       const restFilter = getRestFilters(req)('show');
       const resource = getResourceName(req);
       const cancan = CanCan(getPolicy(resource)); // Okay, on travaille avec cette politique qui est lié à la resource de la requête
       const model = getModel(resource);
 
-      const query = { slug: req.params[resource] };
+      if (!query) query = { slug: req.params.slug };
 
       // db.collection.findOne(query, projection) restFilter = projection
       const q = model.findOne(query, restFilter);
