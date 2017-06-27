@@ -1,5 +1,5 @@
-const getRestFilters = require('../RestFilters').getRestFilters;
-const getRestCursor = require('../RestCursor').getRestCursor;
+const getRestFilters = require('../RestFiltersServiceProvider').getRestFilters;
+const getRestCursor = require('../RestCursorsServiceProvider').getRestCursor;
 const fillSchema = require('fill-schema');
 const Controller = require('./Controller');
 const getResourceName = require('./utils/getResourceName');
