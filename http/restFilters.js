@@ -1,7 +1,7 @@
 const RestFilters = function ({ projection }) {
   const restFilters = (req, filters = {}) => ({
     projection () {
-      return restFilters(req, Object.assign({}, filters, projection()))
+      return restFilters(req, Object.assign({}, filters, projection(req)))
     },
     get: () => filters,
   })
