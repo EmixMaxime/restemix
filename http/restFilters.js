@@ -6,6 +6,7 @@ const RestFilters = function ({ projection }) {
     get: () => filters,
   })
 
+  return restFilters
 }
 
 const GetRestFilters = function ({ restFilters }) {
