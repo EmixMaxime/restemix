@@ -12,44 +12,51 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
   });
 
   return {
+
     async index (req, { user } = {}) {
-      const restFilter = getRestFilters(req)('index');
-      const restCursor = getRestCursor(req)('index'); // { limit: 5, sort: { price: -1 } }
-      const cursorSetters = Object.keys(restCursor); // [limit, sort]
+      const restFilters = getRestFilters(req)('index') // e.g: { field: true }
+      const restCursors = getRestCursor(req)('index') // e.g: { limit: 5, sort: { price: -1 } }
+      const cursorSetters = Object.keys(restCursors) // e.g: [limit, sort]
 
-      // const restCursor = { lol: true, troll: false };
-      // const cursorSetters = [];
-
-      const resource = getResourceName(req);
-      const cancan = CanCan(getPolicy(resource)); // Okay, on travaille avec cette politique qui est lié à la resource de la requête
-      const model = getModel(resource);
+      const resource = getResourceName(req) // Get the resource name based on the request
+      const model = getModel(resource)
+      const cancan = CanCan(getPolicy(resource)) // Initialize the cancan library. See: https://github.com/EmixMaxime/cancan 
 
       // Prepare the query with the cursor setters (limit, sort)
       // The first {} it will be the where clause (?where:price>5)
       // It will come in the future version (not now!)
 
-      /** Just in case */
-      const q = model.find({}, restFilter);
+      /**
+       * Call cursor methods with the value
+       * e.g: restCursors = { limit: 5, sort: { price: -1 } } -> q.limit(5).sort({ price: -1 })
+       */
+      const q = model.find({}, restFilters)
       try {
         cursorSetters.forEach(cursorSetter => {
-          const value = restCursor[cursorSetter];
-          q[cursorSetter](value);
-        });
+          const value = restCursors[cursorSetter]
+          q[cursorSetter](value)
+        })
       } catch (error) {
         /** "q[cursorSetter] is not a function" */
         if (error instanceof TypeError) {
-          throw new RestEmixException(); // This error should be never throw
+          throw new RestEmixException() // This error should be never throw
         }
       }
 
-      const data = await q.exec();
+      /**
+       * Reminder: "gives you a fully-fledged promise"
+       * Source: http://mongoosejs.com/docs/promises.html
+       */
+      const data = await q.exec()
 
-      if (!data) throw new NotFoundError();
+      if (!data) throw new NotFoundError()
 
-      // The user can't do that, he's unauthorized
-      if (cancan(user)('index')(data) === false) throw new CannotError();
+      /**
+       * The user can't do that, he's unauthorized
+       */
+      if (cancan(user)('index')(data) === false) throw new CannotError()
 
-      return data;
+      return data
     },
 
     async show(req, { user, query } = {}) {
