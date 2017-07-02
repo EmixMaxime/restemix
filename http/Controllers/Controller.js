@@ -29,6 +29,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
       /**
        * Call cursor methods with the value
        * e.g: restCursors = { limit: 5, sort: { price: -1 } } -> q.limit(5).sort({ price: -1 })
+       * See: https://docs.mongodb.com/manual/reference/method/js-cursor/
        */
       const q = model.find({}, restFilters)
       try {
