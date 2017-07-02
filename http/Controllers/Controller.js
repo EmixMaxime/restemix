@@ -41,6 +41,7 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
         if (error instanceof TypeError) {
           throw new RestEmixException() // This error should be never throw
         }
+        throw error
       }
 
       /**
