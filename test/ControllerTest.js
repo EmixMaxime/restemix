@@ -1,13 +1,15 @@
 const chai = require('chai');
 const chaiAsPromised = require("chai-as-promised");
 const sinon = require('sinon');
+var sinonChai = require("sinon-chai");
 const expect = chai.expect;
 
 chai.use(chaiAsPromised);
+chai.use(sinonChai);
 
 const Cannot = require('../http/Controllers/Exceptions/CannotError');
 
-const getResourceName = require('../http/Controllers/utils/getResourceName.js');
+const getResourceName = require('../http/Controllers/utils/getResourceName');
 
 const controllerServiceProvider = require('../http/Controllers/ControllerServiceProvider').controllerServiceProvider;
 
@@ -40,73 +42,82 @@ const getRestFiltersMock = function (fakeRequest, fakeAction) {
 
 describe('Controller', () => {
 
-  describe.skip('#index, #show called getRestFilters', () => {
-    it('It should call getRestFilters function with the request and call the returns function with action index', () => {
-      const callback = () => { };
-      const getResourceName = getResourceNameMock();
-      // const controller = Controller({ getRestFilters, getRestCursor, getResourceName, null, null, getModel, getSchemaObject });
-      controller.show(req, callback);
-    });
-  });
+  describe.skip('#index && #show calls getRestFilters properly', () => {
 
-  describe.skip('All methods call properly cancan', () => {
-    const getRestFilters = () => () => { return {} };
-    const getRestCursor = getRestFilters;
+  })
 
-    const getResourceName = () => { };
+  describe('Calls', () => {
 
-    const fakePolicy = {};
-    const getPolicy = function (resourceName) {
-      return fakePolicy;
-    };
+    beforeEach(() => {
+      getRestFilerAction = _action => { return {} }
+      getRestCursorAction = getRestFilerAction
 
-    const cancanData = (data) => true;
-    const cancanAction = (action) => { console.log({ action }); return cancanData };
-    const cancanUser = (user) => {  console.log('user ', user); return cancanAction };
-    const CanCan = function (policy) {
-      console.log({policy});
-      return cancanUser;
-    };
+      filterActionSpy = sinon.spy(getRestFilerAction)
+      cursorActionSpy = sinon.spy(getRestCursorAction)
 
-    const cancanSpy = sinon.spy(CanCan);
-    const cancanDataSpy = sinon.spy(cancanData);
-    const cancanActionSpy = sinon.spy(cancanAction);
-    const cancanUserSpy = sinon.spy(cancanUser);
+      getRestFilters = _req => filterActionSpy
+      getRestCursor = getRestFilters
 
-    const fakeData = {
-      title: 'Who is emix?'
-    };
+      filtersSpy = sinon.spy(getRestFilters)
+      cursorSpy  = sinon.spy(getRestCursor)
 
-    const fakeModel = {
-      find: () => fakeModel,
-      exec: () => new Promise(resolve => resolve(fakeModel)),
-    };
+      fakeGetResourceName = () => {}
 
-    const getModel = () => fakeModel;
+      fakePolicy = {}
+      getPolicy = _resourceName => fakePolicy
 
-    const fakeRequest = {
-      jwt: 'emix',
-    };
+      cancanData = _data => true
+      cancanDataSpy = sinon.spy(cancanData)
 
-    const fillSchema = () => { };
+      cancanAction = _action => cancanDataSpy
+      cancanActionSpy = sinon.spy(cancanAction)
 
-    const Controller = controllerServiceProvider({
-      getResourceName, getRestCursor, getRestFilters, fillSchema,
-      CanCan
-    });
+      cancanUser = _user => { console.log({_user}); return cancanActionSpy }
+      cancanUserSpy = sinon.spy(cancanUser)
 
-    it('lol', () => {
-      const controller = Controller(getModel, () => { }, getPolicy);
+      CanCan = _policy => cancanUserSpy
+      cancanSpy = sinon.spy(CanCan)
+
+      fakeData = { title: 'Who is emix?' }
+      fakeModel = {
+        find: () => fakeModel,
+        exec: () => new Promise(resolve => resolve(fakeData)),
+      }
+
+      getModel = _modelName => fakeModel
+
+      fakeRequest = { jwt: 'emix' }
+      fillSchema = () => {}
+
+      Controller = controllerServiceProvider({
+        getResourceName: fakeGetResourceName, getRestCursor: cursorSpy, getRestFilters: filtersSpy, fillSchema,
+        CanCan: cancanSpy
+      })
+    })
+
+
+
+    it('All methods should calls properly cancan', () => {
+      const controller = Controller(getModel, () => { }, getPolicy)
 
       return controller.index(fakeRequest).then(() => {
-        console.log('call count : ', cancanSpy.callCount);// POURQUOI 0....
-        expect(cancanActionSpy.calledWith('index')).to.be.false;
+        expect(cancanSpy).to.have.been.calledWith(fakePolicy)
+        expect(cancanActionSpy).to.have.been.calledWith('index')
 
-        expect(cancanDataSpy.withArgs(fakeData).called).to.be.false;
-      });
-    });
+        expect(cancanDataSpy).to.have.been.calledWith(fakeData)
+      })
+    })
 
-  });
+    it('It should calls getRestFilters function with the request and calls the returns function with the action (e.g index)', () => {
+      const controller = Controller(getModel, () => {}, getPolicy)
+
+      return controller.index(fakeRequest).then(() => {
+        expect(cursorSpy).to.have.been.calledOnce
+        expect(cursorSpy).to.have.been.calledWithMatch(fakeRequest)
+      })
+    })
+
+  })
 
   describe('Check calls cursor and setter mongodb function', () => {
     const projection = { title: true };
