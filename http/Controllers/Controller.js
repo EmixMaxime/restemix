@@ -3,7 +3,7 @@ const RestEmixException = require('./Exceptions/RestEmixException');
 const NotFoundError = require('./Exceptions/NotFoundError');
 
 // getModel et getSchemaObject sont injectés dans RestController de l'application ;-)
-const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema, CanCan, _merge }, getModel, getSchemaObject, getPolicy) => {
+const Controller = ({ getRestFilters, getRestCursor, getRestPopulate, getResourceName, fillSchema, CanCan, _merge }, getModel, getSchemaObject, getPolicy) => {
 
   // Validate the dependencies needs to be function
   const functionDeps = { getRestFilters, getRestCursor, getResourceName, fillSchema, CanCan, getModel, getSchemaObject, getPolicy };
@@ -14,8 +14,10 @@ const Controller = ({ getRestFilters, getRestCursor, getResourceName, fillSchema
   return {
 
     async index (req, { user } = {}) {
-      const restFilters = getRestFilters(req)('index') // e.g: { field: true }
-      const restCursors = getRestCursor(req)('index') // e.g: { limit: 5, sort: { price: -1 } }
+      const restFilters     = getRestFilters(req)('index') // e.g: { field: true }
+      const restCursors     = getRestCursor(req)('index') // e.g: { limit: 5, sort: { price: -1 } }
+      // const restPopulate = getRestPopulate(req)(restFilters)
+
       const cursorSetters = Object.keys(restCursors) // e.g: [limit, sort]
 
       const resource = getResourceName(req) // Get the resource name based on the request
