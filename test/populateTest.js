@@ -12,14 +12,14 @@ describe('populate', () => {
     const limitQuery = { populate: 'seasons.episodes' }
     const fakeRequest = { query: limitQuery }
 
-    const p = populate(fakeRequest)
+    const p = populate(fakeRequest)()
     expect(p).to.be.eql(limitQuery)
   })
 
   it('It should returns an empty Object without populate query into the given request', () => {
     const fakeRequest = { query: {} }
 
-    const p = populate(fakeRequest)
+    const p = populate(fakeRequest)()
     expect(p).to.be.eql({})
   })
 
