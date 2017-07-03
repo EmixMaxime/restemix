@@ -33,7 +33,7 @@ const Controller = ({ getRestFilters, getRestCursor, getRestPopulate, getResourc
        * e.g: restCursors = { limit: 5, sort: { price: -1 } } -> q.limit(5).sort({ price: -1 })
        * See: https://docs.mongodb.com/manual/reference/method/js-cursor/
        */
-      const q = model.find({}, restFilters)
+      const q = model.find({}, restFilters.projection)
       try {
         cursorSetters.forEach(cursorSetter => {
           const value = restCursors[cursorSetter]
@@ -72,7 +72,7 @@ const Controller = ({ getRestFilters, getRestCursor, getRestPopulate, getResourc
       if (!query) query = { slug: req.params.slug };
 
       // db.collection.findOne(query, projection) restFilter = projection
-      const q = model.findOne(query, restFilter);
+      const q = model.findOne(query, restFilter.projection);
       const data = await q.exec();
 
       if (!data) throw new NotFoundError();

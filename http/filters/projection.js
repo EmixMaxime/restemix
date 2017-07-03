@@ -12,9 +12,9 @@ const projection = (req) => {
   if (queryFilter.length === 0) return {}
 
   return queryFilter.split(',').reduce((acc, filter) => {
-    acc[filter] = projectionType === 'includes'
+    acc.projection[filter] = projectionType === 'includes'
     return acc
-  }, {})
+  }, {projection: {}})
 }
 
 module.exports = projection

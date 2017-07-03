@@ -24,7 +24,7 @@ describe('RestFilters', () => {
     const fakeRequest = {
       query: { includes: 'title,author' }
     }
-    const expectedResult = { title: true, author: true }
+    const expectedResult = {projection: { title: true, author: true }}
 
     const result = restFilters(fakeRequest).projection().get()
     expect(result).to.be.eql(expectedResult)

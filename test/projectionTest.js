@@ -25,7 +25,7 @@ describe('#projection', () => {
     }
 
     const result = projection(fakeRequest);
-    expect(result).to.eql({title: true, author: true})
+    expect(result).to.eql({projection: {title: true, author: true}})
   })
 
   it('It should returns excludes Object', () => {
@@ -34,6 +34,6 @@ describe('#projection', () => {
     }
 
     const result = projection(fakeRequest);
-    expect(result).to.eql({title: false, author: false})
+    expect(result).to.eql({projection: {title: false, author: false}})
   })
 })
